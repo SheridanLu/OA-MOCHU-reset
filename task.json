@@ -38,9 +38,9 @@
   ],
   "statistics": {
     "total": 60,
-    "completed": 1,
+    "completed": 2,
     "in_progress": 0,
-    "pending": 59,
+    "pending": 58,
     "blocked": 0
   },
   "tasks": [
@@ -124,10 +124,10 @@
           "detail": "在 path 字段创建索引，支持 LIKE '/1/2/%' 快速查询"
         }
       ],
-      "status": "pending",
+      "status": "completed",
       "assigned_to": null,
-      "started_at": null,
-      "completed_at": null,
+      "started_at": "2026-03-07T03:44:00+08:00",
+      "completed_at": "2026-03-07T03:45:40.119062",
       "notes": []
     },
     {
