@@ -1,0 +1,437 @@
+{
+  "project": "OA-MOCHU-reset",
+  "version": "1.0.0",
+  "description": "基于 Long-running Agent 架构的 OA 系统开发",
+  "created_at": "2026-03-07T02:44:00+08:00",
+  "tasks": [
+    {
+      "id": "T001",
+      "category": "infrastructure",
+      "priority": 1,
+      "title": "初始化项目基础结构",
+      "description": "创建项目目录结构，包括 frontend、backend、data、docs 等文件夹，设置 package.json 和基础配置",
+      "steps": [
+        "创建 frontend/ 目录，初始化 React + Vite 项目",
+        "创建 backend/ 目录，初始化 Express 服务器",
+        "创建 data/ 目录用于 SQLite 数据库",
+        "创建 docs/ 目录用于项目文档",
+        "创建 .env.example 环境变量模板"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T002",
+      "category": "database",
+      "priority": 2,
+      "title": "设计并创建数据库表结构",
+      "description": "设计 OA 系统核心数据库表，包括用户、部门、项目、合同、财务等模块",
+      "steps": [
+        "设计 users 表（用户基本信息）",
+        "设计 departments 表（组织架构）",
+        "设计 projects 表（项目管理）",
+        "设计 contracts 表（合同管理）",
+        "设计 budgets 表（预算管理）",
+        "设计 materials 表（物资管理）",
+        "设计 approvals 表（审批流程）",
+        "创建数据库初始化脚本 init_db.js"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T003",
+      "category": "backend",
+      "priority": 3,
+      "title": "实现用户认证模块",
+      "description": "实现 JWT 认证系统，包括登录、登出、Token 刷新等功能",
+      "steps": [
+        "创建 auth 路由和控制器",
+        "实现 JWT Token 生成和验证",
+        "实现密码加密和验证",
+        "创建认证中间件",
+        "编写 API 文档"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T004",
+      "category": "backend",
+      "priority": 4,
+      "title": "实现组织架构管理 API",
+      "description": "实现部门的增删改查，支持树形结构",
+      "steps": [
+        "创建 departments 路由",
+        "实现部门 CRUD 操作",
+        "支持部门层级关系",
+        "添加权限检查"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T005",
+      "category": "backend",
+      "priority": 5,
+      "title": "实现项目管理 API",
+      "description": "实现项目的立项、查询、修改、中止等功能",
+      "steps": [
+        "创建 projects 路由",
+        "实现实体项目立项（10位编号）",
+        "实现虚拟项目立项（8位编号）",
+        "实现虚拟转实体功能",
+        "实现项目中止功能",
+        "支持项目列表和详情查询"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T006",
+      "category": "backend",
+      "priority": 6,
+      "title": "实现合同管理 API",
+      "description": "实现收入合同和支出合同的管理",
+      "steps": [
+        "创建 contracts 路由",
+        "实现收入合同 CRUD",
+        "实现支出合同 CRUD",
+        "实现合同模板管理",
+        "支持合同审批流程"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T007",
+      "category": "backend",
+      "priority": 7,
+      "title": "实现预算管理 API",
+      "description": "实现预算编制、执行、分析功能",
+      "steps": [
+        "创建 budgets 路由",
+        "实现预算编制",
+        "支持 Excel 导入",
+        "实现成本分析",
+        "创建价格库"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T008",
+      "category": "backend",
+      "priority": 8,
+      "title": "实现物资管理 API",
+      "description": "实现进销存管理，包括采购、入库、出库、退库",
+      "steps": [
+        "创建 materials 路由",
+        "实现采购申请",
+        "实现物资入库",
+        "实现物资出库",
+        "实现物资退库",
+        "实现库存查询"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T009",
+      "category": "backend",
+      "priority": 9,
+      "title": "实现审批流程引擎",
+      "description": "实现通用的多级审批流程",
+      "steps": [
+        "创建 approvals 路由",
+        "设计审批流程数据结构",
+        "实现审批发起",
+        "实现审批处理",
+        "支持审批历史查询"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T010",
+      "category": "backend",
+      "priority": 10,
+      "title": "实现报表系统 API",
+      "description": "实现各类统计报表接口",
+      "steps": [
+        "创建 reports 路由",
+        "实现月度产值报表",
+        "实现采购执行率报表",
+        "实现收支统计报表",
+        "实现合同付款进度报表"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T011",
+      "category": "frontend",
+      "priority": 11,
+      "title": "搭建前端项目框架",
+      "description": "初始化 React 项目，配置路由、状态管理、UI 组件库",
+      "steps": [
+        "使用 Vite 创建 React 项目",
+        "安装并配置 Ant Design",
+        "配置 React Router",
+        "配置 Axios 请求封装",
+        "创建基础布局组件"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T012",
+      "category": "frontend",
+      "priority": 12,
+      "title": "实现登录页面",
+      "description": "实现用户登录界面和认证逻辑",
+      "steps": [
+        "创建 Login 页面组件",
+        "实现登录表单验证",
+        "对接登录 API",
+        "实现 Token 存储",
+        "实现登录状态保持"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T013",
+      "category": "frontend",
+      "priority": 13,
+      "title": "实现主布局和导航",
+      "description": "实现系统的主界面布局和菜单导航",
+      "steps": [
+        "创建 MainLayout 组件",
+        "实现侧边栏菜单",
+        "实现顶部导航栏",
+        "实现面包屑导航",
+        "实现用户信息展示"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T014",
+      "category": "frontend",
+      "priority": 14,
+      "title": "实现组织架构管理页面",
+      "description": "实现部门的树形展示和管理功能",
+      "steps": [
+        "创建 DepartmentPage 组件",
+        "实现部门树形展示",
+        "实现部门新增/编辑弹窗",
+        "实现部门删除确认",
+        "对接后端 API"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T015",
+      "category": "frontend",
+      "priority": 15,
+      "title": "实现项目管理页面",
+      "description": "实现项目列表、立项、详情等功能页面",
+      "steps": [
+        "创建 ProjectListPage 组件",
+        "创建 ProjectCreatePage 组件",
+        "创建 ProjectDetailPage 组件",
+        "实现项目状态流转",
+        "对接后端 API"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T016",
+      "category": "frontend",
+      "priority": 16,
+      "title": "实现合同管理页面",
+      "description": "实现合同列表、签订、审批等功能页面",
+      "steps": [
+        "创建 ContractListPage 组件",
+        "创建 ContractCreatePage 组件",
+        "创建 ContractDetailPage 组件",
+        "实现合同审批流程",
+        "对接后端 API"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T017",
+      "category": "frontend",
+      "priority": 17,
+      "title": "实现预算管理页面",
+      "description": "实现预算编制、执行监控等页面",
+      "steps": [
+        "创建 BudgetListPage 组件",
+        "创建 BudgetEditPage 组件",
+        "实现 Excel 导入功能",
+        "实现预算执行图表",
+        "对接后端 API"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T018",
+      "category": "frontend",
+      "priority": 18,
+      "title": "实现物资管理页面",
+      "description": "实现进销存相关页面",
+      "steps": [
+        "创建 MaterialListPage 组件",
+        "创建 MaterialPurchasePage 组件",
+        "创建 MaterialStockPage 组件",
+        "实现库存统计图表",
+        "对接后端 API"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T019",
+      "category": "frontend",
+      "priority": 19,
+      "title": "实现报表中心页面",
+      "description": "实现各类报表的可视化展示",
+      "steps": [
+        "创建 ReportCenterPage 组件",
+        "使用 ECharts 实现图表",
+        "实现报表导出功能",
+        "实现日期筛选",
+        "对接后端 API"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T020",
+      "category": "testing",
+      "priority": 20,
+      "title": "编写后端单元测试",
+      "description": "为后端 API 编写单元测试",
+      "steps": [
+        "配置 Jest 测试框架",
+        "编写认证模块测试",
+        "编写项目管理测试",
+        "编写合同管理测试",
+        "确保测试覆盖率 > 80%"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T021",
+      "category": "deployment",
+      "priority": 21,
+      "title": "配置生产环境部署",
+      "description": "配置 systemd 服务和 PM2 进程守护",
+      "steps": [
+        "编写 systemd 服务文件",
+        "配置 PM2 ecosystem",
+        "配置 Nginx 反向代理",
+        "配置 SSL 证书",
+        "编写部署文档"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    },
+    {
+      "id": "T022",
+      "category": "documentation",
+      "priority": 22,
+      "title": "编写项目文档",
+      "description": "编写完整的项目文档",
+      "steps": [
+        "编写 README.md",
+        "编写 API 文档",
+        "编写部署指南",
+        "编写用户手册",
+        "编写开发者指南"
+      ],
+      "status": "pending",
+      "assigned_to": null,
+      "started_at": null,
+      "completed_at": null,
+      "notes": []
+    }
+  ],
+  "statistics": {
+    "total": 22,
+    "completed": 0,
+    "in_progress": 0,
+    "pending": 22,
+    "blocked": 0
+  }
+}
