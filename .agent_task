@@ -1,0 +1,31 @@
+# 当前任务
+- 任务ID: T001
+- 任务标题: 初始化项目基础结构
+- 分配时间: 2026-03-07 03:40:54
+
+## 执行指令
+
+请按照 CLAUDE.md 中的工作流程执行以下操作：
+
+1. **读取项目文件**
+   - 读取 task.json 找到任务 T001 的详细信息
+   - 读取 progress.txt 了解项目进展
+   - 读取 CLAUDE.md 了解工作规范
+
+2. **更新任务状态**
+   - 将 task.json 中 T001 的 status 改为 "in_progress"
+   - 设置 started_at 为当前时间
+
+3. **执行开发工作**
+   - 按照任务的 steps 逐步实现
+   - 遵循 acceptance_criteria 验收标准
+
+4. **更新进度**
+   - 完成后更新 progress.txt 记录工作内容
+   - 更新 task.json 标记任务完成
+
+5. **提交代码**
+   - git add .
+   - git commit -m "feat(T001): 初始化项目基础结构"
+
+开始工作！
