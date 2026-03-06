@@ -16,8 +16,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API 路由（待实现）
-// app.use('/api/auth', require('./routes/auth'));
+// API 路由
+app.use('/api/auth', require('./routes/auth'));
 // app.use('/api/projects', require('./routes/projects'));
 // app.use('/api/contracts', require('./routes/contracts'));
 

@@ -38,9 +38,9 @@
   ],
   "statistics": {
     "total": 60,
-    "completed": 2,
+    "completed": 4,
     "in_progress": 0,
-    "pending": 58,
+    "pending": 56,
     "blocked": 0
   },
   "tasks": [
@@ -165,11 +165,13 @@
           "detail": "admin/admin123, 关联总公司部门"
         }
       ],
-      "status": "pending",
+      "status": "completed",
       "assigned_to": null,
-      "started_at": null,
-      "completed_at": null,
-      "notes": []
+      "started_at": "2026-03-07T03:45:56.758682",
+      "completed_at": "2026-03-07T03:46:07.439176",
+      "notes": [
+        "内容已包含在 T002 的 init_db.js 中"
+      ]
     },
     {
       "id": "T004",
@@ -215,11 +217,13 @@
           "detail": "project:create/approve/convert/terminate, contract:sign-income/sign-expense/approve-finance/approve-legal, material:inbound/outbound/return 等"
         }
       ],
-      "status": "pending",
+      "status": "completed",
       "assigned_to": null,
       "started_at": null,
-      "completed_at": null,
-      "notes": []
+      "completed_at": "2026-03-07T03:46:13.964933",
+      "notes": [
+        "内容已包含在 T002 的 init_db.js 中"
+      ]
     },
     {
       "id": "T005",
