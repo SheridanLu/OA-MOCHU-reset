@@ -1,8 +1,21 @@
 #!/bin/bash
 
-# run_agent.sh - OA-MOCHU-reset 自动化开发流程脚本
-# 用法: bash run_agent.sh <次数>
-# 示例: bash run_agent.sh 5  (运行5次开发流程)
+# ============================================
+# OA-MOCHU-reset Agent 自动运行脚本
+# ============================================
+# 
+# 用法: ./run_agent.sh <次数> [选项]
+# 示例: ./run_agent.sh 10
+#       ./run_agent.sh 5 --dry-run
+#
+# 此脚本会循环调用 GLM Agent，
+# 每次 Agent 会：
+# 1. 读取 CLAUDE.md 了解工作流程
+# 2. 读取 progress.txt 了解项目进展
+# 3. 从 task.json 领取一个任务
+# 4. 执行开发工作
+# 5. 更新文档并提交代码
+# ============================================
 
 set -e
 
@@ -15,251 +28,291 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# 获取参数
-RUN_COUNT=${1:-1}
-
-# 验证参数
-if ! [[ "$RUN_COUNT" =~ ^[0-9]+$ ]] || [ "$RUN_COUNT" -lt 1 ]; then
-    echo -e "${RED}错误: 请提供有效的运行次数（正整数）${NC}"
-    echo "用法: bash run_agent.sh <次数>"
-    echo "示例: bash run_agent.sh 5"
-    exit 1
-fi
-
-# 获取脚本所在目录
+# 配置
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-# 日志文件
 LOG_DIR="$SCRIPT_DIR/logs"
-mkdir -p "$LOG_DIR"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-MAIN_LOG="$LOG_DIR/agent_${TIMESTAMP}.log"
+PROMPT_FILE="$SCRIPT_DIR/agent_prompt.txt"
+MAX_RETRIES=3
+DELAY_BETWEEN_RUNS=5
 
 # 日志函数
-log() {
-    local level=$1
-    local message=$2
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[${timestamp}] [${level}] ${message}" | tee -a "$MAIN_LOG"
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-log_info() { log "INFO" "$1"; }
-log_warn() { log "WARN" "$1"; }
-log_error() { log "ERROR" "$1"; }
-log_success() { log "SUCCESS" "$1"; }
-
-# 分隔线
-separator() {
-    echo "==================================================" | tee -a "$MAIN_LOG"
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-# 获取当前待处理任务数
-get_pending_count() {
-    if [ -f "task.json" ]; then
-        grep -o '"status": "pending"' task.json | wc -l
-    else
-        echo 0
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+log_agent() {
+    echo -e "${PURPLE}[AGENT]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+# 显示使用帮助
+show_usage() {
+    echo "用法: $0 <运行次数> [选项]"
+    echo ""
+    echo "参数:"
+    echo "  运行次数    Agent 执行的次数 (1-100)"
+    echo ""
+    echo "选项:"
+    echo "  --dry-run   只显示将要执行的操作，不实际运行"
+    echo "  --no-delay  运行之间不等待"
+    echo "  --help      显示此帮助信息"
+    echo ""
+    echo "示例:"
+    echo "  $0 1              # 运行 1 次"
+    echo "  $0 10             # 运行 10 次"
+    echo "  $0 5 --dry-run    # 模拟运行 5 次"
+    exit 0
+}
+
+# 检查依赖
+check_dependencies() {
+    log_info "检查依赖..."
+    
+    # 检查 claude 命令是否存在
+    if ! command -v claude &> /dev/null; then
+        log_error "未找到 'claude' 命令"
+        log_info "请先安装 Claude CLI: npm install -g @anthropic-ai/claude-code"
+        exit 1
     fi
-}
-
-# 获取下一个待处理任务
-get_next_task() {
-    if [ -f "task.json" ]; then
-        node -e "
-            const fs = require('fs');
-            const data = JSON.parse(fs.readFileSync('task.json', 'utf8'));
-            const pending = data.tasks.find(t => t.status === 'pending');
-            if (pending) {
-                console.log('Task #' + pending.id + ': ' + pending.title);
-                console.log('Description: ' + pending.description);
-            } else {
-                console.log('No pending tasks');
-            }
-        " 2>/dev/null || echo "无法读取任务"
-    else
-        echo "task.json 不存在"
+    
+    # 检查必要文件
+    if [ ! -f "$SCRIPT_DIR/CLAUDE.md" ]; then
+        log_error "未找到 CLAUDE.md 文件"
+        exit 1
     fi
+    
+    if [ ! -f "$SCRIPT_DIR/task.json" ]; then
+        log_error "未找到 task.json 文件"
+        exit 1
+    fi
+    
+    log_success "依赖检查通过"
 }
 
-# 运行单次开发流程
-run_single_iteration() {
-    local iteration=$1
-    local total=$2
+# 创建日志目录
+setup_logging() {
+    mkdir -p "$LOG_DIR"
     
-    echo "" | tee -a "$MAIN_LOG"
-    separator
-    log_info "${CYAN}开始第 ${iteration}/${total} 次开发流程${NC}"
-    separator
-    echo "" | tee -a "$MAIN_LOG"
+    # 创建本次运行的日志文件
+    RUN_LOG="$LOG_DIR/run_$(date '+%Y%m%d_%H%M%S').log"
+    touch "$RUN_LOG"
     
-    # 检查是否还有待处理任务
-    local pending_before=$(get_pending_count)
-    log_info "当前待处理任务数: ${pending_before}"
+    log_info "日志文件: $RUN_LOG"
+}
+
+# 创建 Agent 提示词
+create_agent_prompt() {
+    cat > "$PROMPT_FILE" << 'EOF'
+你是一个长期运行的自主开发 Agent。请严格按照 CLAUDE.md 中定义的工作流程执行：
+
+1. 首先，读取 CLAUDE.md 文件了解工作流程和规范
+2. 然后，读取 progress.txt 了解项目的最新进展
+3. 接着，查看 task.json，找到一个状态为 "pending" 且优先级最高的任务
+4. 执行该任务的开发工作，遵循任务中的 steps
+5. 完成后，更新 progress.txt 和 task.json
+6. 最后，用 git 提交所有更改
+
+重要提示：
+- 一次只处理一个任务
+- 遇到困难时必须在 progress.txt 中记录并求助
+- 所有 git commit 必须包含任务 ID
+- 不要跳过测试环节
+
+请开始工作！
+EOF
+}
+
+# 获取任务统计
+get_task_stats() {
+    local total=$(grep -c '"id":' "$SCRIPT_DIR/task.json" 2>/dev/null || echo "0")
+    local completed=$(grep -c '"status": "completed"' "$SCRIPT_DIR/task.json" 2>/dev/null || echo "0")
+    local pending=$(grep -c '"status": "pending"' "$SCRIPT_DIR/task.json" 2>/dev/null || echo "0")
+    local in_progress=$(grep -c '"status": "in_progress"' "$SCRIPT_DIR/task.json" 2>/dev/null || echo "0")
     
-    if [ "$pending_before" -eq 0 ]; then
-        log_warn "没有待处理的任务，跳过本次运行"
+    echo "总任务: $total | 已完成: $completed | 进行中: $in_progress | 待处理: $pending"
+}
+
+# 运行单次 Agent
+run_agent_once() {
+    local run_number=$1
+    local dry_run=$2
+    
+    log_agent "========== 第 $run_number 次运行 =========="
+    
+    # 显示当前状态
+    log_info "当前任务状态: $(get_task_stats)"
+    
+    if [ "$dry_run" = "true" ]; then
+        log_warning "[DRY-RUN] 将执行: claude --dangerously-skip-permissions -p \"\$(cat $PROMPT_FILE)\""
         return 0
     fi
-    
-    # 读取当前任务信息
-    log_info "下一个任务:"
-    get_next_task | while read line; do
-        log_info "  $line"
-    done
-    
-    # 构建发送给 GLM 的 prompt
-    local PROMPT="你是一个软件开发助手，正在开发 OA-MOCHU-reset 项目。
-
-请按照以下步骤工作：
-
-1. 读取 task.json 文件，找到第一个 status 为 'pending' 的任务
-2. 将该任务的 status 改为 'in_progress'，设置 assigned 为 'glm'，started_at 为当前时间
-3. 按照 CLAUDE.md 中的指南开发实现
-4. 完成后测试验证功能
-5. 更新 task.json 将任务 status 改为 'completed'，填写 completed_at
-6. 更新 progress.txt 记录工作日志
-7. 使用 git add . && git commit -m 'feat: 任务标题 (#task-id)' && git push 提交代码
-
-重要规则：
-- 一次只做一个任务
-- 遇到问题及时更新 task.json 的 error 字段并报告
-- 保持代码在可运行状态
-- 参考 ../MOCHU-OA-TESTV1 项目的代码结构
-
-当前项目路径: $(pwd)
-参考项目路径: $(dirname $(pwd))/MOCHU-OA-TESTV1
-
-开始工作！"
-
-    log_info "调用 GLM 进行开发..."
-    log_info "Prompt 长度: ${#PROMPT} 字符"
     
     # 记录开始时间
     local start_time=$(date +%s)
     
-    # 调用 GLM
-    # 方式1: 如果有 openclaw CLI
-    if command -v openclaw &> /dev/null; then
-        log_info "使用 openclaw CLI 调用..."
-        openclaw agent run --prompt "$PROMPT" --auto-approve 2>&1 | tee -a "$MAIN_LOG"
-        local exit_code=${PIPESTATUS[0]}
-    # 方式2: 如果有 claude CLI
-    elif command -v claude &> /dev/null; then
-        log_info "使用 claude CLI 调用..."
-        claude --dangerously-skip-permissions --print "$PROMPT" 2>&1 | tee -a "$MAIN_LOG"
-        local exit_code=${PIPESTATUS[0]}
-    # 方式3: 模拟运行（测试用）
-    else
-        log_warn "未检测到 AI CLI 工具，模拟运行..."
+    # 调用 Claude
+    log_info "启动 Agent..."
+    
+    # 使用 --dangerously-skip-permissions 自动跳过所有权限确认
+    # 使用 --allowedTools 指定允许的工具
+    # 使用 -p 传入提示词
+    if claude --dangerously-skip-permissions \
+              --allowedTools "Read,Write,Edit,Bash,Glob,Grep" \
+              -p "$(cat $PROMPT_FILE)" \
+              2>&1 | tee -a "$RUN_LOG"; then
         
-        # 模拟：标记第一个任务为已完成
-        node -e "
-            const fs = require('fs');
-            const data = JSON.parse(fs.readFileSync('task.json', 'utf8'));
-            const task = data.tasks.find(t => t.status === 'pending');
-            if (task) {
-                task.status = 'completed';
-                task.assigned = 'simulated-glm';
-                task.started_at = new Date().toISOString();
-                task.completed_at = new Date().toISOString();
-                data.statistics.pending--;
-                data.statistics.completed++;
-                fs.writeFileSync('task.json', JSON.stringify(data, null, 2));
-                console.log('模拟完成任务 #' + task.id + ': ' + task.title);
-            }
-        " 2>&1 | tee -a "$MAIN_LOG"
+        local end_time=$(date +%s)
+        local duration=$((end_time - start_time))
         
-        local exit_code=0
-    fi
-    
-    # 记录结束时间
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
-    
-    # 检查任务状态变化
-    local pending_after=$(get_pending_count)
-    local completed=$((pending_before - pending_after))
-    
-    echo "" | tee -a "$MAIN_LOG"
-    if [ "$completed" -gt 0 ]; then
-        log_success "${GREEN}✓ 完成了 ${completed} 个任务${NC}"
+        log_success "第 $run_number 次运行完成 (耗时: ${duration}s)"
+        log_info "更新后的任务状态: $(get_task_stats)"
+        
+        # 检查是否还有待处理任务
+        local pending=$(grep -c '"status": "pending"' "$SCRIPT_DIR/task.json" 2>/dev/null || echo "0")
+        if [ "$pending" -eq 0 ]; then
+            log_success "🎉 所有任务已完成！"
+            return 99  # 特殊退出码表示全部完成
+        fi
+        
+        return 0
     else
-        log_warn "${YELLOW}⚠ 本次运行未完成任务${NC}"
+        log_error "第 $run_number 次运行失败"
+        return 1
     fi
-    
-    log_info "本次耗时: ${duration} 秒"
-    log_info "剩余待处理任务: ${pending_after}"
-    
-    # 如果任务失败，等待一下再继续
-    if [ "$completed" -eq 0 ] && [ "$pending_before" -gt 0 ]; then
-        log_warn "任务可能遇到问题，等待 5 秒后继续..."
-        sleep 5
-    fi
-    
-    return 0
 }
 
-# 主流程
+# 主函数
 main() {
-    echo "" | tee -a "$MAIN_LOG"
-    separator
-    log_info "${PURPLE}OA-MOCHU-reset 自动化开发流程${NC}"
-    log_info "运行次数: ${RUN_COUNT}"
-    log_info "日志文件: ${MAIN_LOG}"
-    separator
+    # 解析参数
+    local runs=1
+    local dry_run=false
+    local no_delay=false
     
-    # 初始化环境
-    if [ ! -f ".initialized" ]; then
-        log_info "首次运行，执行环境初始化..."
-        bash init.sh 2>&1 | tee -a "$MAIN_LOG"
-        touch .initialized
+    # 检查参数
+    if [ $# -eq 0 ]; then
+        show_usage
     fi
     
-    # 循环运行
-    local completed_total=0
-    for i in $(seq 1 $RUN_COUNT); do
-        # 检查是否还有任务
-        if [ $(get_pending_count) -eq 0 ]; then
-            log_info "${GREEN}所有任务已完成！${NC}"
+    # 解析第一个参数（运行次数）
+    if [[ $1 =~ ^[0-9]+$ ]]; then
+        runs=$1
+        shift
+    else
+        log_error "无效的运行次数: $1"
+        show_usage
+    fi
+    
+    # 验证运行次数范围
+    if [ "$runs" -lt 1 ] || [ "$runs" -gt 100 ]; then
+        log_error "运行次数必须在 1-100 之间"
+        exit 1
+    fi
+    
+    # 解析其他选项
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            --no-delay)
+                no_delay=true
+                shift
+                ;;
+            --help|-h)
+                show_usage
+                ;;
+            *)
+                log_error "未知选项: $1"
+                show_usage
+                ;;
+        esac
+    done
+    
+    # 显示 banner
+    echo ""
+    echo "========================================"
+    echo "  OA-MOCHU-reset Agent Runner"
+    echo "========================================"
+    echo ""
+    log_info "计划运行次数: $runs"
+    log_info "Dry Run 模式: $dry_run"
+    log_info "工作目录: $SCRIPT_DIR"
+    echo ""
+    
+    # 检查依赖
+    check_dependencies
+    
+    # 设置日志
+    setup_logging
+    
+    # 创建提示词
+    create_agent_prompt
+    
+    # 主循环
+    local success_count=0
+    local fail_count=0
+    local i=1
+    
+    while [ $i -le $runs ]; do
+        echo ""
+        log_info "进度: $i / $runs (成功: $success_count, 失败: $fail_count)"
+        
+        if run_agent_once $i $dry_run; then
+            ((success_count++))
+        else
+            ((fail_count++))
+            
+            # 如果连续失败，询问是否继续
+            if [ $fail_count -ge $MAX_RETRIES ]; then
+                log_error "连续失败 $fail_count 次"
+                read -p "是否继续？(y/n): " -n 1 -r
+                echo
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    log_info "用户终止运行"
+                    break
+                fi
+                fail_count=0  # 重置失败计数
+            fi
+        fi
+        
+        # 检查是否全部完成
+        if [ $? -eq 99 ]; then
             break
         fi
         
-        run_single_iteration $i $RUN_COUNT
-        
-        # 更新统计
-        local pending_now=$(get_pending_count)
-        if [ $i -lt $RUN_COUNT ] && [ "$pending_now" -gt 0 ]; then
-            log_info "等待 3 秒后继续下一次运行..."
-            sleep 3
+        # 等待间隔
+        if [ "$no_delay" = "false" ] && [ $i -lt $runs ]; then
+            log_info "等待 ${DELAY_BETWEEN_RUNS}s 后继续..."
+            sleep $DELAY_BETWEEN_RUNS
         fi
+        
+        ((i++))
     done
     
-    # 最终统计
-    echo "" | tee -a "$MAIN_LOG"
-    separator
-    log_info "${PURPLE}运行完成！${NC}"
-    separator
-    
-    local final_pending=$(get_pending_count)
-    local total_tasks=$(node -e "
-        const fs = require('fs');
-        const data = JSON.parse(fs.readFileSync('task.json', 'utf8'));
-        console.log(data.statistics.total);
-    " 2>/dev/null || echo "未知")
-    local completed_tasks=$((total_tasks - final_pending))
-    
-    echo "" | tee -a "$MAIN_LOG"
-    log_info "任务统计:"
-    log_info "  - 总任务数: ${total_tasks}"
-    log_info "  - 已完成: ${completed_tasks}"
-    log_info "  - 待处理: ${final_pending}"
-    if [ "$total_tasks" -gt 0 ]; then
-        log_info "  - 完成率: $((completed_tasks * 100 / total_tasks))%"
-    fi
+    # 显示总结
     echo ""
-    log_info "日志文件: ${MAIN_LOG}"
+    echo "========================================"
+    echo "  运行完成"
+    echo "========================================"
+    log_info "总运行次数: $((success_count + fail_count))"
+    log_success "成功: $success_count"
+    log_error "失败: $fail_count"
+    log_info "最终任务状态: $(get_task_stats)"
+    log_info "详细日志: $RUN_LOG"
+    echo ""
 }
 
-# 执行主流程
-main
+# 运行主函数
+main "$@"

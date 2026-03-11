@@ -1,54 +1,57 @@
-# Dependencies
+# 依赖
 node_modules/
-*/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Build output
+# 构建输出
 dist/
 build/
-*/dist/
-*/build/
+.vite/
 
-# Logs
+# 日志
 logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Environment
+# 环境变量
 .env
 .env.local
-.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
 
-# OS
+# 操作系统
 .DS_Store
 Thumbs.db
 
-# Database (keep structure, ignore data)
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
+# 数据库
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/backups/*.backup
 
-# Uploads (keep directory, ignore files)
-backend/uploads/*
-!backend/uploads/.gitkeep
-
-# Temporary files
+# 临时文件
 *.tmp
 *.temp
 .cache/
 
-# Test coverage
+# 测试覆盖率
 coverage/
+.nyc_output/
 
-# PM2
-.pm2/
+# Agent 日志
+logs/
+agent_prompt.txt
 
-# Initialized flag
-.initialized
+# Claude 设置
+.claude_settings.json
