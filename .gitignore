@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build output
+dist/
+build/
+*/dist/
+*/build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database (keep structure, ignore data)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Uploads (keep directory, ignore files)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test coverage
+coverage/
+
+# PM2
+.pm2/
+
+# Initialized flag
+.initialized

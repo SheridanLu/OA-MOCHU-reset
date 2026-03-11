@@ -1,0 +1,143 @@
+{
+  "project": "OA-MOCHU-reset",
+  "version": "1.0.0",
+  "description": "MOCHU OA 系统重构 - 虚拟项目转实体&中止功能",
+  "created": "2026-03-11",
+  "workflow": {
+    "init": "bash init.sh",
+    "claim_task": "从tasks数组中选择第一个status=pending的任务",
+    "develop": "按CLAUDE.md规范开发",
+    "verify": "测试验证功能",
+    "update": "更新task.json和progress.txt",
+    "commit": "git commit并push"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "title": "项目初始化 - 创建基础结构",
+      "description": "创建后端和前端基础目录结构",
+      "category": "初始化",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 2,
+      "title": "后端 - 虚拟项目转实体API",
+      "description": "实现虚拟项目转实体项目的审批流程API：采购员→财务→总经理",
+      "category": "后端",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 3,
+      "title": "后端 - 虚拟项目中止API",
+      "description": "实现虚拟项目中止审批流程API，支持成本归集到指定实体项目",
+      "category": "后端",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 4,
+      "title": "后端 - 项目编号生成规则",
+      "description": "实体项目10位编号，虚拟项目8位编号，确保唯一性",
+      "category": "后端",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 5,
+      "title": "后端 - 文件自动归集功能",
+      "description": "虚拟项目转实体后，自动将文件归集到新实体项目下",
+      "category": "后端",
+      "priority": "medium",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 6,
+      "title": "前端 - 虚拟项目转实体页面",
+      "description": "创建虚拟项目转实体的表单页面，包含中标通知书上传",
+      "category": "前端",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 7,
+      "title": "前端 - 虚拟项目中止页面",
+      "description": "创建虚拟项目中止表单，支持选择被中止项目成本下挂项目",
+      "category": "前端",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 8,
+      "title": "前端 - 项目列表中止按钮",
+      "description": "在虚拟项目列表中添加中止按钮和中止成本下挂选择",
+      "category": "前端",
+      "priority": "medium",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 9,
+      "title": "前端 - 审批流程页面",
+      "description": "创建虚拟项目转实体和中止的审批列表和详情页面",
+      "category": "前端",
+      "priority": "medium",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    },
+    {
+      "id": 10,
+      "title": "测试 - 功能验证",
+      "description": "验证虚拟项目转实体和中止的完整流程",
+      "category": "测试",
+      "priority": "high",
+      "status": "pending",
+      "assigned": null,
+      "started_at": null,
+      "completed_at": null,
+      "error": null
+    }
+  ],
+  "statistics": {
+    "total": 10,
+    "pending": 10,
+    "in_progress": 0,
+    "completed": 0,
+    "failed": 0
+  }
+}
