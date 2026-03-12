@@ -260,6 +260,171 @@ for (const perm of permissions) {
 }
 console.log('✅ 核心权限点插入完成');
 
+// ============================================
+// 8. 实体项目表 (10位编号: P+YYMMDD+3位序号)
+// ============================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS project_entity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_no VARCHAR(10) NOT NULL UNIQUE COMMENT '项目编号(P+YYMMDD+3位)',
+    contract_name VARCHAR(200) NOT NULL COMMENT '合同名称',
+    alias VARCHAR(100) DEFAULT NULL COMMENT '项目简称',
+    location VARCHAR(200) DEFAULT NULL COMMENT '项目地点',
+    amount_with_tax DECIMAL(15,2) NOT NULL DEFAULT 0 COMMENT '含税金额',
+    amount_without_tax DECIMAL(15,2) NOT NULL DEFAULT 0 COMMENT '不含税金额',
+    tax_amount DECIMAL(15,2) NOT NULL DEFAULT 0 COMMENT '税额',
+    tax_rate DECIMAL(5,2) DEFAULT NULL COMMENT '税率(%)',
+    client_name VARCHAR(100) DEFAULT NULL COMMENT '客户名称',
+    client_contact VARCHAR(50) DEFAULT NULL COMMENT '客户联系人',
+    client_phone VARCHAR(20) DEFAULT NULL COMMENT '客户电话',
+    contract_type VARCHAR(50) DEFAULT NULL COMMENT '合同类型',
+    start_date DATE DEFAULT NULL COMMENT '开工日期',
+    end_date DATE DEFAULT NULL COMMENT '竣工日期',
+    warranty_date DATE DEFAULT NULL COMMENT '质保到期日',
+    remark TEXT DEFAULT NULL COMMENT '备注',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 1进行中 2已竣工 3已关闭',
+    source_type VARCHAR(20) DEFAULT 'direct' COMMENT '来源类型: direct/converted',
+    source_virtual_id INTEGER DEFAULT NULL COMMENT '来源虚拟项目ID',
+    created_by INTEGER NOT NULL COMMENT '创建人ID',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    approved_by INTEGER DEFAULT NULL COMMENT '审批人ID',
+    approved_at DATETIME DEFAULT NULL COMMENT '审批时间',
+    FOREIGN KEY (created_by) REFERENCES user(id),
+    FOREIGN KEY (source_virtual_id) REFERENCES project_virtual(id)
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_entity_no ON project_entity(project_no);
+  CREATE INDEX IF NOT EXISTS idx_entity_status ON project_entity(status);
+  CREATE INDEX IF NOT EXISTS idx_entity_source ON project_entity(source_virtual_id);
+`);
+
+// ============================================
+// 9. 虚拟项目表 (8位编号: V+YYMM+3位序号)
+// ============================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS project_virtual (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_no VARCHAR(8) NOT NULL UNIQUE COMMENT '项目编号(V+YYMM+3位)',
+    virtual_contract_name VARCHAR(200) NOT NULL COMMENT '虚拟合同名称',
+    location VARCHAR(200) DEFAULT NULL COMMENT '项目地点',
+    estimated_amount DECIMAL(15,2) NOT NULL DEFAULT 0 COMMENT '预估金额',
+    client_name VARCHAR(100) DEFAULT NULL COMMENT '客户名称',
+    client_contact VARCHAR(50) DEFAULT NULL COMMENT '客户联系人',
+    client_phone VARCHAR(20) DEFAULT NULL COMMENT '客户电话',
+    contract_type VARCHAR(50) DEFAULT NULL COMMENT '合同类型',
+    investment_limit DECIMAL(15,2) DEFAULT NULL COMMENT '拟投入限额',
+    bid_date DATE DEFAULT NULL COMMENT '投标日期',
+    remark TEXT DEFAULT NULL COMMENT '备注',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 1进行中 2已转实体 3已中止',
+    converted_entity_id INTEGER DEFAULT NULL COMMENT '转换后的实体项目ID',
+    cost_target_type TINYINT DEFAULT NULL COMMENT '中止成本下挂类型: 1实体项目 2部门成本',
+    cost_target_id INTEGER DEFAULT NULL COMMENT '中止成本下挂目标ID',
+    converted_at DATETIME DEFAULT NULL COMMENT '转换时间',
+    terminated_at DATETIME DEFAULT NULL COMMENT '中止时间',
+    terminated_by INTEGER DEFAULT NULL COMMENT '中止操作人ID',
+    created_by INTEGER NOT NULL COMMENT '创建人ID',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES user(id),
+    FOREIGN KEY (converted_entity_id) REFERENCES project_entity(id),
+    FOREIGN KEY (terminated_by) REFERENCES user(id)
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_virtual_no ON project_virtual(project_no);
+  CREATE INDEX IF NOT EXISTS idx_virtual_status ON project_virtual(status);
+  CREATE INDEX IF NOT EXISTS idx_virtual_converted ON project_virtual(converted_entity_id);
+`);
+
+// ============================================
+// 10. 项目付款计划表
+// ============================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS payment_schedule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL COMMENT '项目ID',
+    project_type TINYINT NOT NULL COMMENT '项目类型: 1实体 2虚拟',
+    batch_no INTEGER NOT NULL DEFAULT 1 COMMENT '批次号',
+    payment_date DATE DEFAULT NULL COMMENT '计划付款日期',
+    amount DECIMAL(15,2) NOT NULL DEFAULT 0 COMMENT '计划金额',
+    payment_condition VARCHAR(200) DEFAULT NULL COMMENT '付款条件',
+    actual_date DATE DEFAULT NULL COMMENT '实际付款日期',
+    actual_amount DECIMAL(15,2) DEFAULT NULL COMMENT '实际金额',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0待付款 1已付款 2已取消',
+    remark VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_payment_project ON payment_schedule(project_id, project_type);
+  CREATE INDEX IF NOT EXISTS idx_payment_status ON payment_schedule(status);
+`);
+
+// ============================================
+// 11. 项目附件表 (虚拟转实体后文件归集)
+// ============================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS project_attachment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL COMMENT '项目ID',
+    project_type TINYINT NOT NULL COMMENT '项目类型: 1实体 2虚拟',
+    file_name VARCHAR(200) NOT NULL COMMENT '文件名',
+    file_path VARCHAR(500) NOT NULL COMMENT '文件路径',
+    file_type VARCHAR(50) DEFAULT NULL COMMENT '文件类型',
+    file_size INTEGER DEFAULT NULL COMMENT '文件大小(字节)',
+    category VARCHAR(50) DEFAULT NULL COMMENT '附件分类: bid_notice/contract/other',
+    uploaded_by INTEGER NOT NULL COMMENT '上传人ID',
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uploaded_by) REFERENCES user(id)
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_attach_project ON project_attachment(project_id, project_type);
+`);
+
+// ============================================
+// 12. 审批流程表
+// ============================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS approval_flow (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    business_type VARCHAR(50) NOT NULL COMMENT '业务类型: entity_project/virtual_project/virtual_convert/virtual_terminate',
+    business_id INTEGER NOT NULL COMMENT '业务ID',
+    current_step INTEGER NOT NULL DEFAULT 1 COMMENT '当前审批步骤',
+    total_steps INTEGER NOT NULL DEFAULT 3 COMMENT '总审批步骤',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0审批中 1已通过 2已驳回 3已撤回',
+    applicant_id INTEGER NOT NULL COMMENT '申请人ID',
+    apply_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (applicant_id) REFERENCES user(id)
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_flow_business ON approval_flow(business_type, business_id);
+  CREATE INDEX IF NOT EXISTS idx_flow_status ON approval_flow(status);
+`);
+
+// ============================================
+// 13. 审批记录表
+// ============================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS approval_record (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    flow_id INTEGER NOT NULL COMMENT '流程ID',
+    step INTEGER NOT NULL COMMENT '审批步骤',
+    approver_id INTEGER NOT NULL COMMENT '审批人ID',
+    approver_role VARCHAR(50) DEFAULT NULL COMMENT '审批人角色',
+    action TINYINT NOT NULL COMMENT '操作: 1通过 2驳回 3转交',
+    comment VARCHAR(500) DEFAULT NULL COMMENT '审批意见',
+    approved_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '审批时间',
+    FOREIGN KEY (flow_id) REFERENCES approval_flow(id),
+    FOREIGN KEY (approver_id) REFERENCES user(id)
+  );
+  
+  CREATE INDEX IF NOT EXISTS idx_record_flow ON approval_record(flow_id);
+`);
+
+console.log('✅ 项目相关表创建完成');
+
 // 关闭数据库连接
 db.close();
 console.log('\n🎉 数据库初始化完成！');

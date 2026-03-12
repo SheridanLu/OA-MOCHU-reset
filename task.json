@@ -515,9 +515,9 @@
           "detail": "确保项目编号全局唯一，不可重复"
         }
       ],
-      "status": "pending",
-      "assigned_to": null,
-      "started_at": null,
+      "status": "in_progress",
+      "assigned_to": "claude",
+      "started_at": "2026-03-11T18:42:00+08:00",
       "completed_at": null,
       "notes": []
     },
