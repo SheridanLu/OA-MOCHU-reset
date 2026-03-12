@@ -144,9 +144,12 @@
       "id": "T015",
       "title": "采购清单-移除金额栏",
       "description": "采购清单不需要设置金额栏",
-      "status": "pending",
+      "status": "completed",
       "priority": 2,
       "category": "采购清单",
+      "started_at": "2026-03-13T00:03:00+08:00",
+      "completed_at": "2026-03-13T00:35:00+08:00",
+      "notes": ["已移除单价和金额字段", "保留数量统计"],
       "steps": [
         "检查前端金额相关字段",
         "移除或隐藏金额输入",
