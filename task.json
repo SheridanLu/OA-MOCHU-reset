@@ -160,9 +160,12 @@
       "id": "T016",
       "title": "材料基准价-表样修改",
       "description": "材料基准价注重单位和单价、税率",
-      "status": "pending",
+      "status": "completed",
       "priority": 2,
       "category": "材料基准价",
+      "started_at": "2026-03-13T00:43:00+08:00",
+      "completed_at": "2026-03-13T01:38:00+08:00",
+      "notes": ["已添加 tax_rate 字段", "税率选项：1/3/6/9/13%"],
       "steps": [
         "分析现有材料基准价表结构",
         "添加税率字段",
