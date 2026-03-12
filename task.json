@@ -125,9 +125,12 @@
       "id": "T014",
       "title": "采购清单-设备材料分类",
       "description": "采购清单分为设备和材料两类",
-      "status": "pending",
+      "status": "completed",
       "priority": 1,
       "category": "采购清单",
+      "started_at": "2026-03-12T23:12:00+08:00",
+      "completed_at": "2026-03-12T23:31:00+08:00",
+      "notes": ["已添加 category 字段", "设备类：名称、单位、数量", "材料类：名称、规格型号、单位、数量"],
       "steps": [
         "分析现有采购清单表结构",
         "添加分类字段（设备/材料）",
