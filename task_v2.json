@@ -1,0 +1,219 @@
+{
+  "project": "OA-MOCHU-reset",
+  "version": "1.0.0",
+  "created": "2026-03-12",
+  "description": "基于问题传报文档的任务列表",
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "虚拟转实体-中标通知书附件功能",
+      "description": "附中标通知书改为附件上传，而非仅编号",
+      "status": "completed",
+      "priority": 1,
+      "category": "虚拟项目",
+      "notes": ["已添加 bid_notice_file 字段", "前端添加 Upload 组件"]
+    },
+    {
+      "id": "T002",
+      "title": "虚拟转实体-确认转换按钮修复",
+      "description": "确认转换按键没有反应，审批流程没有流转",
+      "status": "completed",
+      "priority": 1,
+      "category": "虚拟项目",
+      "notes": ["已修复审批API", "已测试审批流程正常"]
+    },
+    {
+      "id": "T003",
+      "title": "虚拟项目中止-审批流程",
+      "description": "中止虚拟项目流程审批缺失",
+      "status": "completed",
+      "priority": 1,
+      "category": "虚拟项目",
+      "notes": ["已添加 abort-with-approval API", "审批流程：采购员→财务→总经理"]
+    },
+    {
+      "id": "T004",
+      "title": "虚拟项目中止-成本归集",
+      "description": "中止的虚拟项目成本归集到指定的实体项目/综合部门成本",
+      "status": "completed",
+      "priority": 1,
+      "category": "虚拟项目",
+      "notes": ["已添加 cost_target_type 和 cost_target_id 字段", "前端可选择实体项目或部门"]
+    },
+    {
+      "id": "T005",
+      "title": "虚拟项目中止-页面冻结",
+      "description": "中止后页面冻结不能再继续操作",
+      "status": "completed",
+      "priority": 2,
+      "category": "虚拟项目",
+      "notes": ["已禁止编辑/删除已中止项目"]
+    },
+    {
+      "id": "T006",
+      "title": "项目立项-审批流程",
+      "description": "项目立项审批流程：采购员→财务人员审批→总经理",
+      "status": "completed",
+      "priority": 1,
+      "category": "项目立项",
+      "notes": ["审批流程已实现", "已整合到审批管理页面"]
+    },
+    {
+      "id": "T007",
+      "title": "项目立项-项目类型窗口",
+      "description": "在项目立项中增加项目类型栏窗口（智能化项目、消防项目、EPC项目）",
+      "status": "completed",
+      "priority": 2,
+      "category": "项目立项",
+      "notes": ["已添加 project_type 字段", "前端下拉选择"]
+    },
+    {
+      "id": "T008",
+      "title": "虚拟项目-项目类型窗口",
+      "description": "在虚拟项目中也同样增加项目类型窗口",
+      "status": "completed",
+      "priority": 2,
+      "category": "虚拟项目",
+      "notes": ["虚拟项目创建页面已添加"]
+    },
+    {
+      "id": "T009",
+      "title": "支出合同-分类校验",
+      "description": "创建支出合同分为设备类和材料类，不同校验规则",
+      "status": "completed",
+      "priority": 1,
+      "category": "支出合同",
+      "notes": ["设备类：物料名称、单位、数量", "材料类：型号规格、物料名称、单位、数量"]
+    },
+    {
+      "id": "T010",
+      "title": "供应商-创建功能修复",
+      "description": "无法创建供应商",
+      "status": "completed",
+      "priority": 1,
+      "category": "供应商",
+      "notes": ["后端API正常", "已测试创建成功"]
+    },
+    {
+      "id": "T011",
+      "title": "供应商-联系人负责区域",
+      "description": "供应商信息添加联系人负责区域栏",
+      "status": "completed",
+      "priority": 2,
+      "category": "供应商",
+      "notes": ["已添加 contact_region 字段"]
+    },
+    {
+      "id": "T012",
+      "title": "支出合同-合同明细字段",
+      "description": "增加设备参数栏、单位选项、税票、税点",
+      "status": "completed",
+      "priority": 1,
+      "category": "支出合同",
+      "notes": ["设备参数、单位（套/台/个/支）、税票（普票/专票）、税点（1/3/6/9/13%）"]
+    },
+    {
+      "id": "T013",
+      "title": "采购清单-关联项目",
+      "description": "采购清单无法关联项目",
+      "status": "completed",
+      "priority": 1,
+      "category": "采购清单",
+      "notes": ["已修复项目列表加载问题"]
+    },
+    {
+      "id": "T014",
+      "title": "采购清单-设备材料分类",
+      "description": "采购清单分为设备和材料两类",
+      "status": "completed",
+      "priority": 1,
+      "category": "采购清单",
+      "started_at": "2026-03-12T23:12:00+08:00",
+      "completed_at": "2026-03-12T23:31:00+08:00",
+      "notes": ["已添加 category 字段", "设备类：名称、单位、数量", "材料类：名称、规格型号、单位、数量"],
+      "steps": [
+        "分析现有采购清单表结构",
+        "添加分类字段（设备/材料）",
+        "设备类：关联材料名称、数量",
+        "材料类：关联名称、型号、数量",
+        "前端表单分类显示",
+        "测试验证"
+      ]
+    },
+    {
+      "id": "T015",
+      "title": "采购清单-移除金额栏",
+      "description": "采购清单不需要设置金额栏",
+      "status": "completed",
+      "priority": 2,
+      "category": "采购清单",
+      "started_at": "2026-03-13T00:03:00+08:00",
+      "completed_at": "2026-03-13T00:35:00+08:00",
+      "notes": ["已移除单价和金额字段", "保留数量统计"],
+      "steps": [
+        "检查前端金额相关字段",
+        "移除或隐藏金额输入",
+        "后端API调整（如需要）"
+      ]
+    },
+    {
+      "id": "T016",
+      "title": "材料基准价-表样修改",
+      "description": "材料基准价注重单位和单价、税率",
+      "status": "completed",
+      "priority": 2,
+      "category": "材料基准价",
+      "started_at": "2026-03-13T00:43:00+08:00",
+      "completed_at": "2026-03-13T01:38:00+08:00",
+      "notes": ["已添加 tax_rate 字段", "税率选项：1/3/6/9/13%"],
+      "steps": [
+        "分析现有材料基准价表结构",
+        "添加税率字段",
+        "调整前端表单显示",
+        "测试验证"
+      ]
+    },
+    {
+      "id": "T017",
+      "title": "材料基准价-分类输入",
+      "description": "材料基准价分为设备和材料两类",
+      "status": "completed",
+      "priority": 1,
+      "category": "材料基准价",
+      "notes": ["已添加 category 字段", "设备类：名称、单位、价格", "材料类：名称、规格型号、单位、价格"]
+    },
+    {
+      "id": "T018",
+      "title": "通知公告-编辑和发布功能",
+      "description": "通知公告不能编辑和发布",
+      "status": "completed",
+      "priority": 1,
+      "category": "通知公告",
+      "notes": ["已添加编辑和发布功能"]
+    },
+    {
+      "id": "T019",
+      "title": "通知公告-重复修复",
+      "description": "通知公告栏重复显示",
+      "status": "completed",
+      "priority": 1,
+      "category": "通知公告"
+    },
+    {
+      "id": "T020",
+      "title": "零星采购-审批整合",
+      "description": "将零星采购审批整合到审批管理页面",
+      "status": "completed",
+      "priority": 1,
+      "category": "审批",
+      "notes": ["审批管理页面统一显示项目和采购审批"]
+    }
+  ],
+  "statistics": {
+    "total": 20,
+    "completed": 16,
+    "pending": 4,
+    "in_progress": 0,
+    "blocked": 0
+  }
+}
